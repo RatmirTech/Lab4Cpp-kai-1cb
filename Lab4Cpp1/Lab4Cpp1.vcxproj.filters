@@ -24,12 +24,21 @@
     <ClCompile Include="task373.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="constants.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input257.txt">
       <Filter>Исходные файлы</Filter>
     </Text>
     <Text Include="output257.txt">
+      <Filter>Исходные файлы</Filter>
+    </Text>
+    <Text Include="input373.txt">
+      <Filter>Исходные файлы</Filter>
+    </Text>
+    <Text Include="output373.txt">
       <Filter>Исходные файлы</Filter>
     </Text>
   </ItemGroup>

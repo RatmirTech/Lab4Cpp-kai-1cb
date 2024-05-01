@@ -127,13 +127,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="constants.cpp" />
     <ClCompile Include="Lab4Cpp1.cpp" />
     <ClCompile Include="task257.cpp" />
     <ClCompile Include="task373.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input257.txt" />
+    <Text Include="input373.txt" />
     <Text Include="output257.txt" />
+    <Text Include="output373.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
