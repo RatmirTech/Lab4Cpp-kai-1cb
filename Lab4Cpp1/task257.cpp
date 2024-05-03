@@ -119,27 +119,27 @@ bool readFromConsole(char*& buffer) {
 }
 
 void PrepareTextForOutput(const char* sequence, char*& outputBuffer, int spaceCount, bool foundYu, const bool foundShina[], bool foundNoOrOn, bool foundAdjacentIdentical, bool patternExists) {
-	std::string output;
-	output += "Количество пробелов: " + std::to_string(spaceCount) + "\n";
-	output += "Буква 'ю' " + std::string(foundYu ? "присутствует" : "отсутствует") + "\n";
-	output += "Слово 'шина' " + std::string((foundShina[0] && foundShina[1] && foundShina[2] && foundShina[3]) ? "присутствует" : "отсутствует") + "\n";
-	output += "Пары 'но' или 'он' " + std::string(foundNoOrOn ? "присутствуют" : "отсутствуют") + "\n";
-	output += "Пары одинаковых соседних символов " + std::string(foundAdjacentIdentical ? "присутствуют" : "отсутствуют") + "\n";
-	output += "Условие e " + std::string(patternExists ? "выполнено" : "не выполнено") + "\n";
+	string output;
+	output += "Количество пробелов: " + to_string(spaceCount) + "\n";
+	output += "Буква 'ю' " + string(foundYu ? "присутствует" : "отсутствует") + "\n";
+	output += "Слово 'шина' " + string((foundShina[0] && foundShina[1] && foundShina[2] && foundShina[3]) ? "присутствует" : "отсутствует") + "\n";
+	output += "Пары 'но' или 'он' " + string(foundNoOrOn ? "присутствуют" : "отсутствуют") + "\n";
+	output += "Пары одинаковых соседних символов " + string(foundAdjacentIdentical ? "присутствуют" : "отсутствуют") + "\n";
+	output += "Условие e " + string(patternExists ? "выполнено" : "не выполнено") + "\n";
 
 	size_t outputLength = output.length() + 1;
-	outputBuffer = new (std::nothrow) char[outputLength];
+	outputBuffer = new (nothrow) char[outputLength];
 	if (outputBuffer == nullptr) {
-		std::cerr << "Ошибка выделения памяти." << std::endl;
+		cerr << "Ошибка выделения памяти." << endl;
 		return;
 	}
 	strcpy(outputBuffer, output.c_str());
 }
 
 bool SaveTextToFile(const char* filename, const char* text) {
-	std::ofstream outputFile(filename);
+	ofstream outputFile(filename);
 	if (!outputFile.is_open()) {
-		std::cerr << "Не удалось открыть файл для записи." << std::endl;
+		cerr << "Не удалось открыть файл для записи." << endl;
 		return false;
 	}
 	outputFile << text;
@@ -149,7 +149,7 @@ bool SaveTextToFile(const char* filename, const char* text) {
 
 void toLowerCase(char* str) {
 	for (int i = 0; str[i] != '\0'; ++i) {
-		str[i] = std::tolower(str[i]);
+		str[i] = tolower(str[i]);
 	}
 }
 
@@ -200,9 +200,11 @@ void init257() {
 			PrepareTextForOutput(dataBuffer, outputBuffer, spaceCount, foundYu, foundShina, foundNoOrOn, foundAdjacentIdentical, patternExists);
 
 			if (out_option == '1') {
-				cout << "Данные: " << outputBuffer << endl;
+				cout << "Исходные Данные: " << dataBuffer << endl;
+				cout << outputBuffer << endl;
 			}
 			else if (out_option == '2') {
+				cout << "Исходные Данные: " << dataBuffer << endl;
 				if (!SaveTextToFile(MyConstants::task257Output, outputBuffer)) {
 					delete[] dataBuffer;
 					continue;

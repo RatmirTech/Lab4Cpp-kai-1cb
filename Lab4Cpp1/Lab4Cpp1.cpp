@@ -8,6 +8,6 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	std::cout << "Лабораторная работа 4!\n";
-	//init257();
-	init373();
+	init257();
+	//init373();
 }
