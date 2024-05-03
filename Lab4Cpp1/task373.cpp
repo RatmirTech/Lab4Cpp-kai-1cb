@@ -261,12 +261,12 @@ void init373() {
 
 			if (out_option == '1') {
 				printAverages(allColumnAverages, cols, "Среднее арифметическое всех столбцов:", false);
-				int evenCount = (cols + 1) / 2;
+				int evenCount = cols / 2;
 				printAverages(evenColumnAverages, evenCount, "Среднее арифметическое четных столбцов:", true);
 			}
 			else if (out_option == '2') {
 				writeResultsToFile(MyConstants::task373Output, allColumnAverages, cols, "Среднее арифметическое всех столбцов:", false);
-				int evenCount = (cols + 1) / 2;
+				int evenCount = cols / 2;
 				writeResultsToFile(MyConstants::task373Output, evenColumnAverages, evenCount, "Среднее арифметическое четных столбцов:", true);
 			}
 			freeMatrix(matrix, rows);
