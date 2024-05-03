@@ -71,31 +71,59 @@ bool readMatrixFromFile(const char* filename, double**& matrix, int& rows, int& 
 	}
 
 	string line;
-	getline(file, line);
-	istringstream iss(line);
-	if (!(iss >> rows >> cols) || rows < 1 || cols < 1) {
-		cout << "Ошибка: некорректный формат размеров матрицы." << endl;
-		return false;
-	}
-
-	if (!allocateMatrix(matrix, rows, cols)) return false;
-
-	regex valid_format("^([+-]?\\d*\\.?\\d+\\s*)+$");
-	for (int i = 0; i < rows; ++i) {
-		if (!getline(file, line) || !regex_match(line, valid_format)) {
-			cout << "Ошибка: некорректные данные в матрице или недостаточно строк." << endl;
-			freeMatrix(matrix, i);
+	rows = 0;
+	cols = -1;
+	bool matrixFound = false; // Флаг для проверки наличия матрицы в файле
+	regex valid_format("^\\s*([+-]?\\d*\\.?\\d+\\s*)+$"); // Регулярное выражение для действительных чисел
+	while (getline(file, line)) {
+		if (!regex_match(line, valid_format)) {
+			cout << "Ошибка: некорректные данные в строке." << endl;
+			file.close();
 			return false;
 		}
 
-		istringstream row_stream(line);
+		istringstream iss(line);
+		double value;
+		int currentColCount = 0;
+		while (iss >> value) {
+			currentColCount++;
+		}
+		if (cols == -1) {
+			cols = currentColCount;
+		}
+		else if (currentColCount != cols) {
+			cout << "Ошибка: разное количество столбцов в разных строках." << endl;
+			file.close();
+			return false;
+		}
+		rows++;
+		matrixFound = true; // Устанавливаем флаг, если были считаны какие-то данные из файла
+	}
+
+	if (!matrixFound) {
+		cout << "Ошибка: файл не содержит матрицы." << endl;
+		file.close();
+		return false;
+	}
+
+	file.clear(); // Сброс флага ошибки файла
+	file.seekg(0, ios::beg); // Вернуть указатель в начало файла
+
+	if (!allocateMatrix(matrix, rows, cols)) {
+		return false;
+	}
+
+	int rowIndex = 0;
+	while (getline(file, line)) {
+		istringstream iss(line);
 		for (int j = 0; j < cols; ++j) {
-			if (!(row_stream >> matrix[i][j])) {
+			if (!(iss >> matrix[rowIndex][j])) {
 				cout << "Ошибка: некорректные данные в строке матрицы." << endl;
-				freeMatrix(matrix, i + 1); // включая текущую неполностью заполненную строку
+				freeMatrix(matrix, rowIndex + 1); // включая текущую неполностью заполненную строку
 				return false;
 			}
 		}
+		rowIndex++;
 	}
 
 	file.close();
@@ -162,20 +190,27 @@ void calculateEvenColumnAverages(const double* const* matrix, int rows, int cols
 	}
 }
 
-void printAverages(const double* averages, int count, const string& message) {
+void printAverages(const double* averages, int count, const string& message, bool evenColumns = false) {
 	cout << message << endl;
-	for (int i{ 0 }; i < count; ++i) {
-		cout << "Среднее для столбца " << i + 1 << ": " << averages[i] << endl;
+	for (int i = 0; i < count; ++i) {
+		int columnNumber = evenColumns ? 2 * (i + 1) : (i + 1);
+		cout << "Среднее для столбца " << columnNumber << ": " << averages[i] << endl;
 	}
 }
 
-void writeResultsToFile(const char* filename, const double* averages, int count, const string& message) {
+void writeResultsToFile(const char* filename, const double* averages, int count, const string& message, bool evenColumns = false) {
 	ofstream file(filename);
+	if (!file.is_open()) {
+		cerr << "Ошибка открытия файла " << filename << endl;
+		return;
+	}
 
 	file << message << endl;
-	for (int i{ 0 }; i < count; ++i) {
-		file << "Среднее для столбца " << i + 1 << ": " << averages[i] << endl;
+	for (int i = 0; i < count; ++i) {
+		int columnNumber = evenColumns ? 2 * (i + 1) : (i + 1);
+		file << "Среднее для столбца " << columnNumber << ": " << averages[i] << endl;
 	}
+
 	file.close();
 }
 
@@ -206,14 +241,14 @@ void init373() {
 			}
 		}
 		else {
-			if (!readMatrixFromFile(MyConstants::task373Input, matrix, rows, cols) || !generateMatrix(matrix, rows, cols)) {
+			if (!readMatrixFromFile(MyConstants::task373Input, matrix, rows, cols)) {
 				continue;
 			}
 		}
 
 		if (matrix != nullptr) {
-			for (int i = 0; i < rows; ++i) {
-				for (int j = 0; j < cols; ++j) {
+			for (int i{ 0 }; i < rows; ++i) {
+				for (int j{ 0 }; j < cols; ++j) {
 					cout << matrix[i][j] << " ";
 				}
 				cout << endl;
@@ -225,17 +260,16 @@ void init373() {
 			calculateEvenColumnAverages(matrix, rows, cols, evenColumnAverages);
 
 			if (out_option == '1') {
-				printAverages(allColumnAverages, cols, "Среднее арифметическое всех столбцов:");
-				printAverages(evenColumnAverages, (cols + 1) / 2, "Среднее арифметическое четных столбцов:");
+				printAverages(allColumnAverages, cols, "Среднее арифметическое всех столбцов:", false);
+				int evenCount = (cols + 1) / 2;
+				printAverages(evenColumnAverages, evenCount, "Среднее арифметическое четных столбцов:", true);
 			}
 			else if (out_option == '2') {
-				writeResultsToFile(MyConstants::task373Output, allColumnAverages, cols, "Среднее арифметическое всех столбцов:");
-				writeResultsToFile(MyConstants::task373Output, evenColumnAverages, (cols + 1) / 2, "Среднее арифметическое четных столбцов:");
+				writeResultsToFile(MyConstants::task373Output, allColumnAverages, cols, "Среднее арифметическое всех столбцов:", false);
+				int evenCount = (cols + 1) / 2;
+				writeResultsToFile(MyConstants::task373Output, evenColumnAverages, evenCount, "Среднее арифметическое четных столбцов:", true);
 			}
-			for (int i{ 0 }; i < rows; ++i) {
-				delete[] matrix[i];
-			}
-			delete[] matrix;
+			freeMatrix(matrix, rows);
 			delete[] allColumnAverages;
 			delete[] evenColumnAverages;
 		}
