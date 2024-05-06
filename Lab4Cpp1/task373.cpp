@@ -56,7 +56,7 @@ bool allocateMatrix(double**& matrix, int rows, int cols) {
 }
 
 void freeMatrix(double**& matrix, int rows) {
-	for (int i = 0; i < rows; ++i) {
+	for (int i{ 0 }; i < rows; ++i) {
 		delete[] matrix[i];
 	}
 	delete[] matrix;
@@ -97,7 +97,7 @@ bool readMatrixFromFile(const char* filename, double**& matrix, int& rows, int& 
 			return false;
 		}
 		rows++;
-		matrixFound = true; // Устанавливаем флаг, если были считаны какие-то данные из файла
+		matrixFound = true; // флаг, чё нить считали данные из файла
 	}
 
 	if (!matrixFound) {
@@ -107,7 +107,7 @@ bool readMatrixFromFile(const char* filename, double**& matrix, int& rows, int& 
 	}
 
 	file.clear(); // Сброс флага ошибки файла
-	file.seekg(0, ios::beg); // Вернуть указатель в начало файла
+	file.seekg(0, ios::beg); // указатель в начало файла
 
 	if (!allocateMatrix(matrix, rows, cols)) {
 		return false;
@@ -199,7 +199,7 @@ void printAverages(const double* averages, int count, const string& message, boo
 }
 
 void writeResultsToFile(const char* filename, const double* averages, int count, const string& message, bool evenColumns = false) {
-	ofstream file(filename);
+	ofstream file(filename, ios::app);
 	if (!file.is_open()) {
 		cerr << "Ошибка открытия файла " << filename << endl;
 		return;
@@ -211,6 +211,15 @@ void writeResultsToFile(const char* filename, const double* averages, int count,
 		file << "Среднее для столбца " << columnNumber << ": " << averages[i] << endl;
 	}
 
+	file.close();
+}
+
+void clearFile(const char* filename) {
+	ofstream file(filename, ios::out | ios::trunc);
+	if (!file.is_open()) {
+		cerr << "Ошибка открытия файла " << filename << endl;
+		return;
+	}
 	file.close();
 }
 
@@ -265,6 +274,7 @@ void init373() {
 				printAverages(evenColumnAverages, evenCount, "Среднее арифметическое четных столбцов:", true);
 			}
 			else if (out_option == '2') {
+				clearFile(MyConstants::task373Output);
 				writeResultsToFile(MyConstants::task373Output, allColumnAverages, cols, "Среднее арифметическое всех столбцов:", false);
 				int evenCount = cols / 2;
 				writeResultsToFile(MyConstants::task373Output, evenColumnAverages, evenCount, "Среднее арифметическое четных столбцов:", true);

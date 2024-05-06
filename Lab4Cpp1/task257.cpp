@@ -38,8 +38,8 @@ void ProcessSequence(const char* sequence, int& spaceCount, bool& foundYu, bool 
 	// условие е
 	int length = strlen(sequence);
 	for (int i = 0; i < length; ++i) {
-		for (int j = i + 2; j < length; ++j) {
-			if (sequence[i] == sequence[j + 1] && sequence[i + 1] == sequence[j]) {
+		for (int j = i + 1; j < length; ++j) {
+			if (sequence[i] == sequence[i + 1] && sequence[j + 1] == sequence[j]) {
 				patternExists = true;
 				break;
 			}
