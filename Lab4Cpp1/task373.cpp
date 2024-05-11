@@ -73,8 +73,8 @@ bool readMatrixFromFile(const char* filename, double**& matrix, int& rows, int& 
 	string line;
 	rows = 0;
 	cols = -1;
-	bool matrixFound = false; // Флаг для проверки наличия матрицы в файле
-	regex valid_format("^\\s*([+-]?\\d*\\.?\\d+\\s*)+$"); // Регулярное выражение для действительных чисел
+	bool matrixFound = false;
+	regex valid_format("^\\s*([+-]?\\d*\\.?\\d+\\s*)+$");
 	while (getline(file, line)) {
 		if (!regex_match(line, valid_format)) {
 			cout << "Ошибка: некорректные данные в строке." << endl;
@@ -97,7 +97,7 @@ bool readMatrixFromFile(const char* filename, double**& matrix, int& rows, int& 
 			return false;
 		}
 		rows++;
-		matrixFound = true; // флаг, чё нить считали данные из файла
+		matrixFound = true;
 	}
 
 	if (!matrixFound) {
@@ -106,8 +106,8 @@ bool readMatrixFromFile(const char* filename, double**& matrix, int& rows, int& 
 		return false;
 	}
 
-	file.clear(); // Сброс флага ошибки файла
-	file.seekg(0, ios::beg); // указатель в начало файла
+	file.clear();
+	file.seekg(0, ios::beg);
 
 	if (!allocateMatrix(matrix, rows, cols)) {
 		return false;
@@ -119,7 +119,7 @@ bool readMatrixFromFile(const char* filename, double**& matrix, int& rows, int& 
 		for (int j = 0; j < cols; ++j) {
 			if (!(iss >> matrix[rowIndex][j])) {
 				cout << "Ошибка: некорректные данные в строке матрицы." << endl;
-				freeMatrix(matrix, rowIndex + 1); // включая текущую неполностью заполненную строку
+				freeMatrix(matrix, rowIndex + 1);
 				return false;
 			}
 		}
@@ -190,7 +190,7 @@ void calculateEvenColumnAverages(const double* const* matrix, int rows, int cols
 	}
 }
 
-void printAverages(const double* averages, int count, const string& message, bool evenColumns = false) {
+void printAverages(const double* averages, int count, const string& message, bool evenColumns) {
 	cout << message << endl;
 	for (int i = 0; i < count; ++i) {
 		int columnNumber = evenColumns ? 2 * (i + 1) : (i + 1);
@@ -198,7 +198,7 @@ void printAverages(const double* averages, int count, const string& message, boo
 	}
 }
 
-void writeResultsToFile(const char* filename, const double* averages, int count, const string& message, bool evenColumns = false) {
+void writeResultsToFile(const char* filename, const double* averages, int count, const string& message, bool evenColumns) {
 	ofstream file(filename, ios::app);
 	if (!file.is_open()) {
 		cerr << "Ошибка открытия файла " << filename << endl;
@@ -223,10 +223,39 @@ void clearFile(const char* filename) {
 	file.close();
 }
 
+bool inputMatrixBody(double**& matrix, int& rows, int& cols) {
+	matrix = new double* [rows];
+	regex valid_format("^\\s*([-]?\\d*\\.?\\d+(\\s+|$)){" + to_string(cols) + "}$");
+
+	for (int i = 0; i < rows; i++) {
+		string line;
+		cout << "Введите строку " << (i + 1) << " матрицы (должно быть ровно " << cols << " чисел): ";
+		getline(cin, line);
+
+		if (!regex_match(line, valid_format)) {
+			cout << "Ошибка: некорректный формат строки. Попробуйте снова." << endl;
+			i--;
+			continue;
+		}
+
+		matrix[i] = new double[cols];
+		istringstream iss(line);
+		for (int j = 0; j < cols; j++) {
+			if (!(iss >> matrix[i][j])) {
+				cout << "Ошибка при чтении числа. Проверьте корректность данных." << endl;
+				delete[] matrix[i];
+				i--;
+				break;
+			}
+		}
+	}
+	return true;
+}
+
 void init373() {
 	regex valid_input("^[12]$");
 	string input;
-	char in_option, out_option, repeat_option = '1';
+	char in_option, out_option, gen_option, repeat_option = '1';
 
 	do {
 		do {
@@ -245,8 +274,19 @@ void init373() {
 		int rows{ 0 };
 		int cols{ 0 };
 		if (in_option == '1') {
-			if (!inputMatrix(matrix, rows, cols) || !generateMatrix(matrix, rows, cols)) {
-				continue;
+			if (!inputMatrix(matrix, rows, cols))	continue;
+
+			do {
+				cout << "Введите '1' для ручного ввода матрицы, '2' для генерации матрицы ";
+				getline(cin, input);
+			} while (!regex_match(input, valid_input));
+			gen_option = input[0];
+
+			if (gen_option == '1') {
+				if (!inputMatrixBody(matrix, rows, cols))	continue;
+			}
+			else {
+				if (!generateMatrix(matrix, rows, cols))	continue;
 			}
 		}
 		else {
